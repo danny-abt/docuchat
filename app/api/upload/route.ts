@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
+const MAX_BYTES = 4 * 1024 * 1024; // 4 MB — Vercel Hobby limite les requêtes à 4.5 MB
 
 export async function POST(req: NextRequest) {
   try {
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
 
     if (file.size > MAX_BYTES) {
       return NextResponse.json(
-        { error: `Fichier trop volumineux (max ${MAX_BYTES / 1024 / 1024} MB).` },
+        { error: `Fichier trop volumineux (max 4 MB sur Vercel).` },
         { status: 413 }
       );
     }

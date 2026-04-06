@@ -163,7 +163,7 @@ export default function Page() {
                 {isUploading ? "Extraction du texte..." : "Glissez un PDF ici"}
               </p>
               <p className="text-xs text-muted">
-                ou cliquez pour parcourir · max 10 MB
+                ou cliquez pour parcourir · max 4 MB
               </p>
             </div>
             <input
