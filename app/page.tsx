@@ -54,7 +54,12 @@ export default function Page() {
       setDoc(data as DocInfo);
     } catch (err) {
       setDoc(null);
-      setUploadError(err instanceof Error ? err.message : "Erreur upload.");
+      const msg = err instanceof Error ? err.message : "";
+      setUploadError(
+        msg.toLowerCase().includes("fetch")
+          ? "Impossible de contacter le serveur. Vérifiez votre connexion."
+          : msg || "Erreur upload."
+      );
     } finally {
       setIsUploading(false);
     }
@@ -94,7 +99,12 @@ export default function Page() {
       if (!res.ok) throw new Error(data.error ?? "Erreur chat.");
       setMessages((m) => [...m, { role: "assistant", content: data.answer }]);
     } catch (err) {
-      setChatError(err instanceof Error ? err.message : "Erreur chat.");
+      const msg = err instanceof Error ? err.message : "";
+      setChatError(
+        msg.toLowerCase().includes("fetch")
+          ? "Impossible de contacter le serveur. Vérifiez votre connexion."
+          : msg || "Erreur chat."
+      );
     } finally {
       setIsAnswering(false);
     }
