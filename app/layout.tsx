@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "DocuChat — Discutez avec vos PDF",
-  description: "Uploadez un PDF et posez-lui des questions grâce à Claude.",
+  description: "Uploadez un PDF et posez-lui des questions.",
 };
 
 export default function RootLayout({
