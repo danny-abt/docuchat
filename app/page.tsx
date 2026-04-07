@@ -48,6 +48,7 @@ export default function Page() {
       const fd = new FormData();
       fd.append("file", file);
       const res = await fetch("/api/upload", { method: "POST", body: fd });
+      if (res.status === 413) throw new Error("Fichier trop volumineux (max 4 MB).");
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Erreur upload.");
       setDoc(data as DocInfo);
@@ -87,6 +88,8 @@ export default function Page() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ documentText: doc.text, messages: next }),
       });
+      if (!res.ok && res.headers.get("content-type")?.includes("application/json") === false)
+        throw new Error(`Erreur serveur (${res.status}).`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Erreur chat.");
       setMessages((m) => [...m, { role: "assistant", content: data.answer }]);
