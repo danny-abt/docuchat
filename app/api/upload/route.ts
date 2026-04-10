@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
 
     if (file.size > MAX_BYTES) {
       return NextResponse.json(
-        { error: `Fichier trop volumineux (max 4 MB sur Vercel).` },
+        { error: "Fichier trop volumineux (max 4 MB sur Vercel)." },
         { status: 413 }
       );
     }
@@ -35,12 +35,27 @@ export async function POST(req: NextRequest) {
       data: Buffer
     ) => Promise<{ text: string; numpages: number }>;
 
-    const parsed = await pdfParse(buffer);
+    let parsed: { text: string; numpages: number };
+    try {
+      parsed = await pdfParse(buffer);
+    } catch (parseErr) {
+      const msg = parseErr instanceof Error ? parseErr.message.toLowerCase() : "";
+      if (msg.includes("password") || msg.includes("encrypted"))
+        return NextResponse.json(
+          { error: "Ce PDF est protégé par un mot de passe. Retirez la protection avant d'uploader." },
+          { status: 422 }
+        );
+      return NextResponse.json(
+        { error: "Le PDF semble corrompu ou dans un format non supporté." },
+        { status: 422 }
+      );
+    }
+
     const text = parsed.text?.trim() ?? "";
 
     if (!text) {
       return NextResponse.json(
-        { error: "Impossible d'extraire du texte de ce PDF (scan image ?)." },
+        { error: "Impossible d'extraire du texte de ce PDF. Il s'agit probablement d'un PDF scanné (images). Utilisez un PDF avec du texte sélectionnable." },
         { status: 422 }
       );
     }

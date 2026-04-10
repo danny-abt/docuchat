@@ -72,14 +72,29 @@ export async function POST(req: NextRequest) {
       .join("\n")
       .trim();
 
+    if (!answer) {
+      return NextResponse.json(
+        { error: "Claude n'a pas retourné de réponse. Réessayez." },
+        { status: 500 }
+      );
+    }
+
     return NextResponse.json({ answer });
   } catch (err) {
     console.error("[/api/chat] error:", err);
-    const message =
-      err instanceof Error ? err.message : "Erreur inconnue côté serveur.";
-    return NextResponse.json(
-      { error: `Erreur Claude : ${message}` },
-      { status: 500 }
-    );
+
+    const raw = err instanceof Error ? err.message : "";
+
+    let userMessage = "Erreur inattendue. Réessayez.";
+    if (raw.includes("overloaded") || raw.includes("529"))
+      userMessage = "Les serveurs Claude sont surchargés. Réessayez dans quelques secondes.";
+    else if (raw.includes("credit") || raw.includes("balance"))
+      userMessage = "Crédits Anthropic insuffisants. Rechargez votre compte.";
+    else if (raw.includes("401") || raw.includes("invalid_api_key"))
+      userMessage = "Clé API invalide. Vérifiez votre configuration.";
+    else if (raw.includes("rate_limit") || raw.includes("429"))
+      userMessage = "Limite de requêtes atteinte. Patientez un moment.";
+
+    return NextResponse.json({ error: userMessage }, { status: 500 });
   }
 }
