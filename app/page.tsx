@@ -41,6 +41,7 @@ export default function Page() {
   }, [messages, isAnswering]);
 
   const uploadFile = useCallback(async (file: File) => {
+    if (isUploading) return;
     setUploadError(null);
     setIsUploading(true);
     setMessages([]);
@@ -63,7 +64,7 @@ export default function Page() {
     } finally {
       setIsUploading(false);
     }
-  }, []);
+  }, [isUploading]);
 
   const onDrop = (e: DragEvent<HTMLDivElement>) => {
     e.preventDefault();
@@ -97,6 +98,7 @@ export default function Page() {
         throw new Error(`Erreur serveur (${res.status}).`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Erreur chat.");
+      if (!data.answer) throw new Error("Réponse vide reçue du serveur.");
       setMessages((m) => [...m, { role: "assistant", content: data.answer }]);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "";
